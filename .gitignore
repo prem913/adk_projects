@@ -1,0 +1,10 @@
+__pycache__
+.venv
+.adk
+.pytest_cache
+.idea
+.vscode
+.env*
+coding_agent_test
+
+
