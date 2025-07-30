@@ -1,4 +1,5 @@
 import os
+import fnmatch
 
 class FileSystemTool:
     """A tool for securely interacting with a local filesystem within a specified base directory."""
@@ -42,23 +43,77 @@ class FileSystemTool:
     def get_file_structure(self) -> str:
         """
         1. get_file_structure tool: Use this to get the directory structure.
-        All paths are shown relative to the base path.
+        All paths are shown relative to the base path. It ignores files and directories
+        specified in a .gitignore file in the base path.
 
         Returns:
             str: A string representing the directory tree structure.
         """
         tree_string = ""
+        ignore_patterns = []
+        gitignore_path = os.path.join(self.base_path, '.gitignore')
+        
+        if os.path.exists(gitignore_path):
+            with open(gitignore_path, 'r', encoding='utf-8') as f:
+                # Read patterns, ignore comments and empty lines
+                ignore_patterns = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+
         try:
             for root, dirs, files in os.walk(self.base_path, topdown=True):
-                # Exclude hidden/system directories for a cleaner view
-                dirs[:] = [d for d in dirs if not d.startswith(('.', '__'))]
-                files = [f for f in files if not f.startswith('.')]
-
                 relative_root = os.path.relpath(root, self.base_path)
-                level = relative_root.count(os.sep) if relative_root != '.' else 0
+
+                # --- .gitignore filtering logic ---
                 
+                # Filter directories in-place so os.walk doesn't traverse them
+                original_dirs = list(dirs)
+                dirs[:] = [] # Clear the list to rebuild it with non-ignored dirs
+                for d in original_dirs:
+                    is_ignored = False
+                    for p in ignore_patterns:
+                        pattern_to_match = p.strip('/')
+                        # Case 1: Root-anchored pattern (e.g., /dist, /build/)
+                        if p.startswith('/'):
+                            if relative_root == '.' and fnmatch.fnmatch(d, pattern_to_match):
+                                is_ignored = True
+                                break
+                        # Case 2: Non-anchored pattern (e.g., __pycache__/, *.o)
+                        # This will match any file or directory with that name.
+                        elif fnmatch.fnmatch(d, pattern_to_match):
+                            is_ignored = True
+                            break
+                    if not is_ignored:
+                        dirs.append(d)
+
+                # Filter files (we don't modify files[:] as it has no effect on traversal)
+                original_files = list(files)
+                files[:] = [] # Clear the list to rebuild
+                for f in original_files:
+                    is_ignored = False
+                    for p in ignore_patterns:
+                        # Skip patterns that are explicitly for directories
+                        if p.endswith('/'):
+                            continue
+                        
+                        pattern_to_match = p.strip('/')
+                        # Case 1: Root-anchored pattern (e.g., /config.json)
+                        if p.startswith('/'):
+                            if relative_root == '.' and fnmatch.fnmatch(f, pattern_to_match):
+                                is_ignored = True
+                                break
+                        # Case 2: Non-anchored pattern (e.g., *.log)
+                        elif fnmatch.fnmatch(f, pattern_to_match):
+                            is_ignored = True
+                            break
+                    if not is_ignored:
+                        files.append(f)
+
+                # Exclude hidden/system directories for a cleaner view (run this after gitignore)
+                dirs[:] = [d for d in dirs if not d.startswith(('.', '__'))]
+                files[:] = [f for f in files if not f.startswith(('.', '__'))]
+
+                # --- Tree building logic ---
+                level = relative_root.count(os.sep) if relative_root != '.' else 0
                 indent = ' ' * 4 * level
-                # Display the directory name
                 dir_name = os.path.basename(root) if relative_root != '.' else os.path.basename(self.base_path)
                 tree_string += f"{indent}📂 {dir_name}/\n"
                 
@@ -115,3 +170,4 @@ class FileSystemTool:
             return f"✅ File successfully saved to '{relative_path}'"
         except Exception as e:
             return f"Error saving file '{relative_path}': {e}"
+

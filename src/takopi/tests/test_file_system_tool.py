@@ -11,6 +11,7 @@ def fs_tool():
     A pytest fixture that sets up a FileSystemTool instance in a temporary
     directory before each test and cleans it up afterwards.
     """
+    # --- Setup ---
     # Create a unique, temporary directory for the test
     test_dir = tempfile.mkdtemp(prefix="fs_tool_pytest_")
     # Instantiate the tool with this temporary directory as its base
@@ -93,7 +94,6 @@ def test_get_file_structure_empty(fs_tool):
     """
     Test the file structure of an empty directory.
     """
-
     base_dir_name = os.path.basename(fs_tool.base_path)
     expected_structure = f"📂 {base_dir_name}/"
     assert fs_tool.get_file_structure() == expected_structure
@@ -115,3 +115,33 @@ def test_get_file_structure_with_content(fs_tool):
     assert 'main.py' in structure
     assert 'data/' in structure
     assert 'config.json' in structure
+
+def test_get_file_structure_with_gitignore(fs_tool):
+    """
+    Test that get_file_structure correctly ignores files and directories
+    specified in a .gitignore file.
+    """
+    # 1. Create a .gitignore file with patterns
+    gitignore_content = "*.log\n/dist\n__pycache__/\n"
+    fs_tool.save_file('.gitignore', gitignore_content)
+
+    # 2. Create files and directories, some of which should be ignored
+    fs_tool.save_file('app.log', 'some log data')  # Should be ignored
+    fs_tool.save_file('main.py', 'print("hello")') # Should NOT be ignored
+    fs_tool.save_file(os.path.join('dist', 'package.tar.gz'), 'binary data') # Should be ignored
+    fs_tool.save_file(os.path.join('src', '__pycache__', 'cache.pyc'), 'bytecode') # Should be ignored
+    fs_tool.save_file(os.path.join('src', 'app.py'), 'my app') # Should NOT be ignored
+
+    # 3. Get the file structure
+    structure = fs_tool.get_file_structure()
+
+    # 4. Assert that ignored items are NOT in the output
+    assert 'app.log' not in structure
+    assert 'dist/' not in structure
+    assert '__pycache__/' not in structure
+    
+    # 5. Assert that non-ignored items ARE in the output
+    assert 'main.py' in structure
+    assert 'src/' in structure
+    assert 'app.py' in structure
+
