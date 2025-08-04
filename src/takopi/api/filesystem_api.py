@@ -8,7 +8,7 @@ import os
 router = APIRouter()
 
 # Set your base path here
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
+BASE_PATH = os.path.abspath("/home/prem/builds/vibe_coding/adk_projects_runner")
 fs_service = FileSystemService(BASE_PATH)
 
 class SaveFileRequest(BaseModel):

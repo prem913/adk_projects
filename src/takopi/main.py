@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from takopi.agents.agent_runner import AgentRunner
 from takopi.agents.agent import root_agent
 from takopi.api.chatbot import router as chatbot_router
+from takopi.api.filesystem_api import router as filesystem_router
 from common.core.logging import logging
 import asyncio
 import uvicorn
@@ -32,6 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(chatbot_router)
+app.include_router(filesystem_router)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

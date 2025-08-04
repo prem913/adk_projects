@@ -13,7 +13,7 @@ class FileSystemTool:
                              for all file operations. It will be created if it doesn't exist.
         """
         # Resolve the absolute path to prevent ambiguity and store it.
-        self.base_path = os.path.abspath(base_path)
+        self.base_path :str= os.path.abspath(base_path)
         # Create the base directory if it doesn't exist.
         os.makedirs(self.base_path, exist_ok=True)
 
@@ -194,3 +194,7 @@ class FileSystemTool:
         except Exception as e:
             return f"Error deleting file '{relative_path}': {e}"
 
+
+    def change_base_path(self, new_base_path: str):
+        """Change the base path and reinitialize the FileSystemTool."""
+        self.base_path = os.path.abspath(new_base_path)
