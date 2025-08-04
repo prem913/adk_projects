@@ -19,6 +19,12 @@ async def read_root():
     return {"status": "ADK Live Runner is active"}
 
 
+@router.get("/state/{client_id}", summary="Get current session state")
+async def get_session_state(client_id: str):
+    """Returns the current full state for the given client."""
+    session = await adk_runner.get_session(client_id)
+    return {"state": session.state,"events": session.events}
+
 @router.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     """

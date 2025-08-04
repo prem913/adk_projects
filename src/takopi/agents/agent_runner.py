@@ -2,6 +2,7 @@ from typing import Literal
 from google.adk.agents import BaseAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService, Session
+from google.adk.sessions.database_session_service import DatabaseSessionService
 from google.genai import types
 from pydantic import BaseModel
 from common.core.logging import logging
@@ -78,7 +79,7 @@ class AgentRunnerQueue:
     def __init__(self, agent: BaseAgent, name: str = "generic_agent"):
         self.name: str = name
         self.agent: BaseAgent = agent
-        self.session_service: InMemorySessionService = InMemorySessionService()
+        self.session_service: DatabaseSessionService = DatabaseSessionService(db_url="sqlite:///sessions.db")
         self.runner: Runner = Runner(
             app_name=self.name, agent=self.agent, session_service=self.session_service
         )

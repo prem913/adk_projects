@@ -102,7 +102,7 @@ test_agent = Agent(
 
 root_agent = LoopAgent(
     name="coding_agent",
-    sub_agents=[initial_agent, analyser_agent, coder_agent],
+    sub_agents=[analyser_agent, coder_agent],
     description="Executes a sequence of code writing, reviewing, and refactoring.",
-    max_iterations=2,
+    max_iterations=1,
 )

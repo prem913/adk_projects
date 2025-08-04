@@ -1,6 +1,7 @@
 
 import sys
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from takopi.agents.agent_runner import AgentRunner
 from takopi.agents.agent import root_agent
 from takopi.api.chatbot import router as chatbot_router
@@ -23,6 +24,13 @@ async def run():
         logger.warning(f"final response: {res}")
 
 app = FastAPI(title="Agent Runner", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(chatbot_router)
 
 if __name__ == "__main__":
