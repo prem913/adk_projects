@@ -170,4 +170,27 @@ class FileSystemTool:
             return f"✅ File successfully saved to '{relative_path}'"
         except Exception as e:
             return f"Error saving file '{relative_path}': {e}"
+    def delete_file(self, relative_path: str) -> str:
+        """
+        4. delete_file tool: Deletes a file from the filesystem.
+
+        Args:
+            relative_path (str): The path, relative to the base directory, of the file to delete.
+
+        Returns:
+            str: A confirmation message or an error message.
+        """
+        try:
+            full_path = self._get_safe_path(relative_path)
+            if not os.path.exists(full_path):
+                 raise FileNotFoundError
+            if os.path.isdir(full_path):
+                return f"Error: Path '{relative_path}' is a directory, not a file. Cannot delete."
+
+            os.remove(full_path)
+            return f"🗑️ File successfully deleted from '{relative_path}'"
+        except FileNotFoundError:
+            return f"Error: The file at '{relative_path}' was not found."
+        except Exception as e:
+            return f"Error deleting file '{relative_path}': {e}"
 

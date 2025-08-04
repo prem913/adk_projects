@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv,find_dotenv
 
-load_dotenv(find_dotenv())
+_ = load_dotenv(find_dotenv())
 
 class Settings(BaseSettings):
 
@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
 
     class Config:
-        env_file = ".env"
-        extra = "ignore"
+        env_file :str= ".env"
+        extra :str= "ignore"
 
 settings = Settings()
 
