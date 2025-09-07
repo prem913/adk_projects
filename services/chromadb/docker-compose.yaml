@@ -1,0 +1,22 @@
+services:
+  server:
+    image: chromadb/chroma
+    volumes:
+      - chroma_data:/data
+    ports:
+      - "8888:8000"
+    networks:
+      - internal
+    # environment:
+    #   - CHROMA_OPEN_TELEMETRY__ENDPOINT=http://otel-collector:4317/
+    #   - CHROMA_OPEN_TELEMETRY__SERVICE_NAME=chroma
+    # depends_on:
+    #   - otel-collector
+    #   - zipkin
+
+networks:
+  internal:
+
+volumes:
+  chroma_data:
+

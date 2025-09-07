@@ -18,6 +18,8 @@ from .prompt import (
 )
 from .tools.file_system_tool import FileSystemTool
 from .tools.internet_tool import InternetTools
+from .tools.rag_tool import RAGTool
+from ..service.rag_service import RAGService
 from time import sleep
 from common.core.logging import logging
 
@@ -28,6 +30,8 @@ project_base_path = "/home/prem/builds/vibe_coding/adk_projects_runner"
 file_system_tool = FileSystemTool(base_path=project_base_path)
 command_execution_tool = CommandExecutionTool(base_path=project_base_path)
 internet_tool = InternetTools()
+rag_service = RAGService()
+rag_tool = RAGTool(rag_service)
 
 common_tools = [
     file_system_tool.get_file_content,
@@ -54,7 +58,7 @@ initial_agent = Agent(
     model=MODEL,
     description=("Initial Agent that Outlines a Plan for research agent"),
     instruction=initial_agent_prompt,
-    tools=[file_system_tool.get_file_structure, file_system_tool.get_file_content],
+    tools=[file_system_tool.get_file_structure, file_system_tool.get_file_content,rag_tool.knowledge_sensei],
     output_key=INITIAL_KEY,
     before_model_callback=_callback,
 )
@@ -76,7 +80,7 @@ analyser_agent = Agent(
         "Agent That Analyses the Current Code and User Requirements and Outlines a Plan"
     ),
     instruction=analyser_agent_prompt,
-    tools=[*common_tools],
+    tools=[*common_tools,rag_tool.knowledge_sensei],
     output_key=ANALYSE_KEY,
     before_model_callback=_callback,
 )
@@ -85,7 +89,7 @@ coder_agent = Agent(
     model=MODEL,
     description=("Agent that Generates Code"),
     instruction=coder_agent_prompt,
-    tools=[*common_tools, file_system_tool.delete_file],
+    tools=[*common_tools, file_system_tool.delete_file,rag_tool.knowledge_sensei],
     output_key=CODER_KEY,
     before_model_callback=_callback,
 )

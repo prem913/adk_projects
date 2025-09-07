@@ -6,9 +6,11 @@ _ = load_dotenv(find_dotenv())
 class Settings(BaseSettings):
 
     # FastAPI
-    APP_TITLE: str = "AI Financial Coach API"
-    APP_DESCRITPION: str = "Backend for the AI Financial Coach, providing personalized financial advice."
+    APP_TITLE: str = "ADK PROJECTS"
+    APP_DESCRITPION: str = "A multi project project using ADK"
     VERSION: str = "1.0.0"
+    GOOGLE_API_KEY: str="MY NOT SO PREMIUM API KEY"
+    
 
     class Config:
         env_file :str= ".env"
